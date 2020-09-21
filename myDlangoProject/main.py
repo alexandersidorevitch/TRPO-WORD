@@ -1,14 +1,13 @@
-import os
-
 from buffer import Buffer
-from text_editing import TextEditing
-from work_with_files import WorkWithFiles
+
+from myDlangoProject.random_texts import RandomTexts
+from myDlangoProject.text_editing import TextEditing
+from myDlangoProject.work_with_files import WorkWithFiles
 
 
-
-
-class Main(WorkWithFiles, Buffer, TextEditing):
+class Main(WorkWithFiles, Buffer, TextEditing, RandomTexts):
     """Класс для задание по ТРПО (поиск и замена)"""
+
     def __init__(self):
         Buffer.__init__(self)
         self.text = None
@@ -20,7 +19,8 @@ class Main(WorkWithFiles, Buffer, TextEditing):
             print('3. Найти и заменить')
             print('4. Отмена последней операции')
             print('5. Отмена последней отменённой операции')
-            print('6. Вывод сохранённого текста\n')
+            print('6. Вывод сохранённого текста')
+            print('7. Рандомный текст (требуется интернет)')
 
             try:
                 input_number = int(input())
@@ -66,8 +66,9 @@ class Main(WorkWithFiles, Buffer, TextEditing):
 
                     if 'да' == input_number.lower():
                         try:
-                            self.text, message = self.replace_text(word, input('На какое словов заменить?\n'), self.text,
-                                                          int(input('Под каким номером находиться слово?\n')))
+                            self.text, message = self.replace_text(word, input('На какое словов заменить?\n'),
+                                                                   self.text,
+                                                                   int(input('Под каким номером находиться слово?\n')))
                             if message:
                                 self.append_to_history(self.text)
                             print(self.text)
@@ -94,8 +95,18 @@ class Main(WorkWithFiles, Buffer, TextEditing):
                     self.text = new_text
             elif input_number == 6:
                 print(self.text)
+            elif input_number == 7:
+                try:
+                    self.text = self.get_random_text(int(input('Введите число абзацев генерируемого текста')))
+                    print(self.text,end="\n" * 3)
+                    self.insert_to_file(f"{input('Введите название файла')}.txt", self.text)
+                except Exception as e:
+                    print('Напишите число!!')
+                    print(e)
             else:
                 print('Все фигня, давай по новой')
+
+
 
 
 Class = Main()

@@ -1,29 +1,27 @@
-from bs4 import BeautifulSoup
-
-def get_url(self, sort='prc.a'):
-    return f'{self.url}&sort={sort}'
+from functools import reduce
 
 
-def get_html(self, url, params=None):
-    import requests
-    return requests.get(url, headers=self.HEADERS, params=params)
+class RandomTexts:
+    def get_url(self, count_paragraphs):
+        return f'https://fish-text.ru/get?format=html&type=paragraph&number={count_paragraphs}&self=true'
 
+    def get_html(self, url, params=None):
+        import requests
+        return requests.get(url, params=params)
 
-def get_content(self, html):
-    from bs4 import BeautifulSoup as bs
+    def get_content(self, html):
+        from bs4 import BeautifulSoup as bs
 
-    soup = bs(html, 'lxml')
-    print(soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['name']),
-          soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['price']),
-          soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['href']),
-          soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['place']),
-          soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['time']), sep='\n')
-    data = [{'Название': name.text, 'Цена': price.text, 'Ссылка': href.get('href'), 'Место': place.text,
-             'Дата и время публикации': time.text} for
-            name, price, href, place, time in
-            zip(soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['name']),
-                soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['price']),
-                soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['href']),
-                soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['place']),
-                soup.select(self.CLASSES[self.NUMBER_OF_CLASSES]['time']))]
-    return data
+        soup = bs(html, 'lxml')
+        data = reduce(lambda x, y: f'{x}\n     {y}', map(lambda el: el.text, soup.select('p')))
+        return data
+
+    def get_random_text(self, count_paragraphs):
+        try:
+            html = self.get_html(self.get_url(count_paragraphs))
+            if html.ok:
+                return self.get_content(html.text)
+            else:
+                print('Что-то сломалось')
+        except:
+            print('Проблема с интернет соединением')
